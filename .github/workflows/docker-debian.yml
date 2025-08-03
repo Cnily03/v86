@@ -61,6 +61,8 @@ jobs:
           image="${{ steps.build.outputs.image }}"
           echo "Pushing: $image"
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-          docker tag "$image" "ghcr.io/${{ github.repository }}:${{ inputs.publish_tag }}"
-          docker push "ghcr.io/${{ github.repository }}:${{ inputs.publish_tag }}"
-          echo "Pushed: $image to ghcr.io/${{ github.repository }}:${{ inputs.publish_tag }}"
+          push_image="ghcr.io/${{ github.repository }}:${{ inputs.publish_tag }}"
+          push_image="$(echo "$push_image" | tr '[:upper:]' '[:lower:]')"
+          docker tag "$image" "$push_image"
+          docker push "$push_image"
+          echo "Pushed: $image to $push_image"
