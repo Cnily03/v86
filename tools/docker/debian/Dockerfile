@@ -6,7 +6,7 @@ WORKDIR /root/build
 # ------------------------------------------------------------------------------
 
 ENV INSTALL_DIR=/usr/local/bin
-ENV DEBIAN_FRONTEND noninteractive
+ENV DEBIAN_FRONTEND=noninteractive
 
 # ------------------------------------------------------------------------------
 # Base image
@@ -132,7 +132,8 @@ RUN git clone --branch v2.5.3 https://github.com/timd1/vcfdist && cd vcfdist/src
 # SKA2 (requires Rust > 1.74)
 COPY --from=i386/rust:1.83.0-slim-bookworm /usr/local/rustup /usr/local/rustup
 COPY --from=i386/rust:1.83.0-slim-bookworm /usr/local/cargo /usr/local/cargo
-RUN cargo install ska --target i686-unknown-linux-gnu --jobs 5
+RUN rustup install nightly
+RUN cargo +nightly install ska --target i686-unknown-linux-gnu --jobs 5
 RUN install /usr/local/cargo/bin/ska ${INSTALL_DIR}/ska
 
 # Biopython
