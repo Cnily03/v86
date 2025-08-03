@@ -1,19 +1,19 @@
 #!/usr/bin/env node
-"use strict";
+// "use strict";
 
-const path = require("path");
+import { join } from "path";
 
 // TODO:
 // - Timeout
 
 console.log("Don't forget to run `make all` before running this script");
 
-var fs = require("fs");
-var V86 = require("./../../../build/libv86.js").V86;
+import { writeFile } from "fs";
+import { V86 } from "./../../../build/libv86.js";
 
-const V86_ROOT = path.join(__dirname, "../../..");
+const V86_ROOT = join(import.meta.dirname, "../../..");
 
-var OUTPUT_FILE = path.join(V86_ROOT, "images/debian-state-base.bin");
+var OUTPUT_FILE = join(V86_ROOT, "images/debian-state-base.bin");
 
 process.stdin.setRawMode(true);
 process.stdin.resume();
@@ -21,8 +21,8 @@ process.stdin.setEncoding("utf8");
 process.stdin.on("data", handle_key);
 
 var emulator = new V86({
-    bios: { url: path.join(V86_ROOT, "/bios/seabios.bin") },
-    vga_bios: { url: path.join(V86_ROOT, "/bios/vgabios.bin") },
+    bios: { url: join(V86_ROOT, "/bios/seabios.bin") },
+    vga_bios: { url: join(V86_ROOT, "/bios/vgabios.bin") },
     autostart: true,
     memory_size: 1024 * 1024 * 1024,
     vga_memory_size: 8 * 1024 * 1024,
@@ -37,9 +37,9 @@ var emulator = new V86({
     cmdline: "rw init=/bin/systemd root=host9p console=ttyS0 spectre_v2=off pti=off page_poison=on",
     filesystem: {
         basefs: {
-            url: path.join(V86_ROOT, "/images/debian-base-fs.json"),
+            url: join(V86_ROOT, "/images/debian-base-fs.json"),
         },
-        baseurl: path.join(V86_ROOT, "/images/debian-9p-rootfs-flat/"),
+        baseurl: join(V86_ROOT, "/images/debian-9p-rootfs-flat/"),
     },
     screen_dummy: true,
 });
@@ -50,15 +50,13 @@ var boot_start = Date.now();
 var serial_text = "";
 let booted = false;
 
-emulator.add_listener("serial0-output-byte", function(byte)
-{
+emulator.add_listener("serial0-output-byte", function (byte) {
     var c = String.fromCharCode(byte);
     process.stdout.write(c);
 
     serial_text += c;
 
-    if(!booted && serial_text.endsWith("root@localhost:~# "))
-    {
+    if(!booted && serial_text.endsWith("root@localhost:~# ")) {
         console.error("\nBooted in %d", (Date.now() - boot_start) / 1000);
         booted = true;
 
@@ -66,35 +64,29 @@ emulator.add_listener("serial0-output-byte", function(byte)
         // Disable kernel logging with dmesg (drop_caches outputs things to ttyS0 even if run it on another port)
         emulator.serial0_send("dmesg -n 1; sync; echo 3 >/proc/sys/vm/drop_caches; cd ~/tutorial; history -c\n");
 
-        setTimeout(async function ()
-            {
-                const s = await emulator.save_state();
+        setTimeout(async function () {
+            const s = await emulator.save_state();
 
-                fs.writeFile(OUTPUT_FILE, new Uint8Array(s), function(e)
-                    {
-                        if(e) throw e;
-                        console.error("Saved as " + OUTPUT_FILE);
-                        stop();
-                    });
-            }, 10 * 1000);
+            writeFile(OUTPUT_FILE, new Uint8Array(s), function (e) {
+                if(e) throw e;
+                console.error("Saved as " + OUTPUT_FILE);
+                stop();
+            });
+        }, 10 * 1000);
     }
 });
 
-function handle_key(c)
-{
-    if(c === "\u0003")
-    {
+function handle_key(c) {
+    if(c === "\u0003") {
         // ctrl c
         stop();
     }
-    else
-    {
+    else {
         emulator.serial0_send(c);
     }
 }
 
-function stop()
-{
+function stop() {
     emulator.stop();
     process.stdin.pause();
 }
