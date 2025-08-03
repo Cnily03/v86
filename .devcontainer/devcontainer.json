@@ -19,7 +19,7 @@
 				"christian-kohler.npm-intellisense",
 				"dbaeumer.vscode-eslint",
 				"dustypomerleau.rust-syntax",
-				"serayuzgur.crates",
+				"fill-labs.dependi",
 				"ms-vscode.makefile-tools",
 				"rust-lang.rust-analyzer"
 			]

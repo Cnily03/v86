@@ -1,6 +1,6 @@
-FROM library/node:lts-bookworm
+FROM mcr.microsoft.com/devcontainers/universal:3
 
-ARG DEBIAN_FRONTEND=noninteractive
+# setup development environment
 RUN apt update && \
     apt-get install -y nodejs nasm gdb unzip p7zip-full openjdk-17-jre wget python3 qemu-system-x86 git-core build-essential libc6-dev-i386-cross libc6-dev-i386 clang curl time
 RUN npm install -g jshint
@@ -9,3 +9,4 @@ RUN /root/.cargo/bin/rustup toolchain install stable && \
     /root/.cargo/bin/rustup target add wasm32-unknown-unknown && \
     /root/.cargo/bin/rustup component add rustfmt-preview && \
     /root/.cargo/bin/rustup update && /root/.cargo/bin/rustup update nightly
+
